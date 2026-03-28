@@ -1,0 +1,126 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Improvements Counter</title>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        font-family:
+          -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+        min-height: 100vh;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        background: #f8f9fa;
+        transition: background 0.5s ease;
+      }
+
+      body.maxed {
+        background: #e74c3c;
+      }
+
+      h1 {
+        font-size: clamp(1.4rem, 4vw, 2rem);
+        color: #1a1a2e;
+        margin-bottom: 3rem;
+        text-align: center;
+        padding: 0 1rem;
+        transition: color 0.5s ease;
+      }
+
+      body.maxed h1 {
+        color: #fff;
+      }
+
+      .btn {
+        width: 140px;
+        height: 140px;
+        border-radius: 50%;
+        border: none;
+        background: #1a1a2e;
+        color: #fff;
+        font-size: 2.5rem;
+        font-weight: 700;
+        cursor: pointer;
+        transition:
+          transform 0.15s ease,
+          opacity 0.4s ease,
+          background 0.4s ease;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        box-shadow: 0 8px 30px rgba(0, 0, 0, 0.18);
+      }
+
+      .btn:hover:not(:disabled) {
+        transform: scale(1.08);
+      }
+
+      .btn:active:not(:disabled) {
+        transform: scale(0.95);
+      }
+
+      .btn:disabled {
+        opacity: 0.4;
+        cursor: not-allowed;
+      }
+    </style>
+  </head>
+  <body>
+    <h1 id="heading">0/4 improvements brought up today</h1>
+    <button class="btn" id="btn" onclick="increment()">+1</button>
+
+    <script>
+      const STORAGE_KEY = "improvements";
+
+      function getToday() {
+        return new Date().toISOString().slice(0, 10);
+      }
+
+      function load() {
+        try {
+          const raw = localStorage.getItem(STORAGE_KEY);
+          if (!raw) return { count: 0, date: getToday() };
+          const data = JSON.parse(raw);
+          if (data.date !== getToday()) return { count: 0, date: getToday() };
+          return data;
+        } catch {
+          return { count: 0, date: getToday() };
+        }
+      }
+
+      function save(data) {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+      }
+
+      function render(data) {
+        document.getElementById("heading").textContent =
+          `You have brought up ${data.count}/4 improvements today`;
+        const maxed = data.count >= 4;
+        document.getElementById("btn").disabled = maxed;
+        document.body.classList.toggle("maxed", maxed);
+      }
+
+      function increment() {
+        const data = load();
+        if (data.count >= 4) return;
+        data.count++;
+        data.date = getToday();
+        save(data);
+        render(data);
+      }
+
+      const initial = load();
+      save(initial);
+      render(initial);
+    </script>
+  </body>
+</html>
